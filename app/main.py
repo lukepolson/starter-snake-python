@@ -5,7 +5,6 @@ import bottle
 
 os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
 
-#from api import ping_response, start_response, move_response, end_response
 import json
 from bottle import HTTPResponse
 
@@ -17,6 +16,7 @@ from tf_agents.environments import tf_py_environment
 from tf_agents.trajectories import time_step as ts
 from tf_agents.specs import tensor_spec
 
+
 # Import Snake Environment
 import sys
 sys.path.insert(0, "app/app/")
@@ -26,7 +26,7 @@ tf.random.set_seed(888)
 BOARD_SIZE=11
 
 # Import Policy
-policy = tf.compat.v2.saved_model.load('policy_8')
+policy = tf.compat.v2.saved_model.load('C:\\Users\\lukep\\Documents\\Github\\starter-snake-python\\policy_8')
 
 # Direction dictionary
 dir_dict = {0:'right', 1:'down', 2:'left', 3:'up'}
@@ -94,6 +94,24 @@ def get_block_player(dx1, dy1, dx2, dy2):
 	else:
 		print('arr not found')
 		print(arr)
+		
+def get_block_enemy(dx1, dy1, dx2, dy2):
+	arr = (dx1, -dy1, dx2, -dy2)
+	if (arr==(0,1,0,1) or arr==(0,-1,0,-1)):
+		return UB_en
+	elif (arr==(1,0,1,0) or arr==(-1,0,-1,0)):
+		return SB_en
+	elif (arr==(0,1,-1,0) or arr==(1,0,0,-1)):
+		return UL_en
+	elif (arr==(0,1,1,0) or arr==(-1,0,0,-1)):
+		return UR_en
+	elif (arr==(1,0,0,1) or arr==(0,-1,-1,0)):
+		return RU_en
+	elif (arr==(0,-1,1,0) or arr==(-1,0,0,1)):
+		return DR_en
+	else:
+		print('arr not found')
+		print(arr)
 
 def get_board(state):
 	ARR=np.copy(return_state)
@@ -120,7 +138,6 @@ def make_move(data):
 	global y_tail_before
 	global turn
 
-	M=data['you']['health']
 
 	# Create Board
 	state = np.array([([NB]*BOARD_SIZE) for i in range(BOARD_SIZE)], dtype=np.int32)
@@ -161,8 +178,47 @@ def make_move(data):
 			dx1 = int(x-x_prev); dx2 = int(x_next-x)
 			dy1 = int(y-y_prev); dy2 = int(y_next-y)
 			state[y][x] = get_block_player(dx1, dy1, dx2, dy2)
-	x_tail_before = master_x_coords[-1]
-	y_tail_before = master_y_coords[-1]
+	
+	# Add Enemy Snakes
+	snakes = data['board']['snakes'][:-1]
+	for snake in snakes:
+		if turn==0:
+			x_coords = [d['x'] for d in snake['body']][0:1]
+			y_coords = [d['y'] for d in snake['body']][0:1]
+		elif turn==1:
+			x_coords = [d['x'] for d in snake['body']][0:2]
+			y_coords = [d['y'] for d in snake['body']][0:2]
+		else:
+			x_coords = [d['x'] for d in snake['body']]
+			y_coords = [d['y'] for d in snake['body']]
+		for i, (x, y) in enumerate(zip(x_coords, y_coords)):
+			if i == 0:
+				state[y][x] = HB_en
+			elif i==len(x_coords)-1:
+				x_prev = x_coords[i-1]
+				y_prev = y_coords[i-1]
+				
+				dx1 = x-x_prev
+				dy1 = y-y_prev
+				if dx1==1 or dx1==-1:
+					state[y][x] = SB_en
+				else:
+					state[y][x] = UB_en
+					
+			else:
+				x_next = x_coords[i+1]; x_prev = x_coords[i-1]
+				y_next = y_coords[i+1]; y_prev = y_coords[i-1]
+				
+				if (x==x_prev and y==y_prev):
+					continue
+				if (x==x_next and y==y_next):
+					continue
+					
+				dx1 = int(x-x_prev); dx2 = int(x_next-x)
+				dy1 = int(y-y_prev); dy2 = int(y_next-y)
+				state[y][x] = get_block_enemy(dx1, dy1, dx2, dy2)
+	
+	
 	# Add food
 	food_x_coords = [d['x'] for d in data['board']['food']]
 	food_y_coords = [d['y'] for d in data['board']['food']]
@@ -171,8 +227,6 @@ def make_move(data):
 		
 	action_step = policy.action(ts.restart(tf.convert_to_tensor([get_board(state)]), batch_size=1))
 	turn+=1
-	#plt.imshow(np.squeeze(get_board(state), axis=-1))
-	#plt.savefig('games\\test{}.png'.format(turn))
 	action_taken = take_action(data, state, action_step.action.numpy()[0])
 	return dir_dict[action_taken]
 
