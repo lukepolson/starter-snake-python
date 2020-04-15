@@ -26,7 +26,7 @@ tf.random.set_seed(888)
 BOARD_SIZE=11
 
 # Import Policy
-policy = tf.compat.v2.saved_model.load('policy_8')
+policy = tf.compat.v2.saved_model.load('..\\policy_8')
 
 # Direction dictionary
 dir_dict = {0:'right', 1:'down', 2:'left', 3:'up'}
@@ -180,43 +180,45 @@ def make_move(data):
 			state[y][x] = get_block_player(dx1, dy1, dx2, dy2)
 	
 	# Add Enemy Snakes
-	snakes = data['board']['snakes'][:-1]
+	master_id = data['you']['id']
+	snakes = data['board']['snakes']
 	for snake in snakes:
-		if turn==0:
-			x_coords = [d['x'] for d in snake['body']][0:1]
-			y_coords = [d['y'] for d in snake['body']][0:1]
-		elif turn==1:
-			x_coords = [d['x'] for d in snake['body']][0:2]
-			y_coords = [d['y'] for d in snake['body']][0:2]
-		else:
-			x_coords = [d['x'] for d in snake['body']]
-			y_coords = [d['y'] for d in snake['body']]
-		for i, (x, y) in enumerate(zip(x_coords, y_coords)):
-			if i == 0:
-				state[y][x] = HB_en
-			elif i==len(x_coords)-1:
-				x_prev = x_coords[i-1]
-				y_prev = y_coords[i-1]
-				
-				dx1 = x-x_prev
-				dy1 = y-y_prev
-				if dx1==1 or dx1==-1:
-					state[y][x] = SB_en
-				else:
-					state[y][x] = UB_en
-					
+		if snake['id']!=master_id:
+			if turn==0:
+				x_coords = [d['x'] for d in snake['body']][0:1]
+				y_coords = [d['y'] for d in snake['body']][0:1]
+			elif turn==1:
+				x_coords = [d['x'] for d in snake['body']][0:2]
+				y_coords = [d['y'] for d in snake['body']][0:2]
 			else:
-				x_next = x_coords[i+1]; x_prev = x_coords[i-1]
-				y_next = y_coords[i+1]; y_prev = y_coords[i-1]
-				
-				if (x==x_prev and y==y_prev):
-					continue
-				if (x==x_next and y==y_next):
-					continue
+				x_coords = [d['x'] for d in snake['body']]
+				y_coords = [d['y'] for d in snake['body']]
+			for i, (x, y) in enumerate(zip(x_coords, y_coords)):
+				if i == 0:
+					state[y][x] = HB_en
+				elif i==len(x_coords)-1:
+					x_prev = x_coords[i-1]
+					y_prev = y_coords[i-1]
 					
-				dx1 = int(x-x_prev); dx2 = int(x_next-x)
-				dy1 = int(y-y_prev); dy2 = int(y_next-y)
-				state[y][x] = get_block_enemy(dx1, dy1, dx2, dy2)
+					dx1 = x-x_prev
+					dy1 = y-y_prev
+					if dx1==1 or dx1==-1:
+						state[y][x] = SB_en
+					else:
+						state[y][x] = UB_en
+						
+				else:
+					x_next = x_coords[i+1]; x_prev = x_coords[i-1]
+					y_next = y_coords[i+1]; y_prev = y_coords[i-1]
+					
+					if (x==x_prev and y==y_prev):
+						continue
+					if (x==x_next and y==y_next):
+						continue
+						
+					dx1 = int(x-x_prev); dx2 = int(x_next-x)
+					dy1 = int(y-y_prev); dy2 = int(y_next-y)
+					state[y][x] = get_block_enemy(dx1, dy1, dx2, dy2)
 	
 	
 	# Add food
