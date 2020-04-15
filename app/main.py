@@ -5,7 +5,9 @@ import bottle
 
 os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
 
-from api import ping_response, start_response, move_response, end_response
+#from api import ping_response, start_response, move_response, end_response
+import json
+from bottle import HTTPResponse
 
 import numpy as np
 import tensorflow as tf
@@ -302,6 +304,43 @@ def end():
 
 	return end_response()
 
+def ping_response():
+    return HTTPResponse(
+        status=200
+    )
+
+def start_response(color):
+    assert type(color) is str, \
+        "Color value must be string"
+
+    return HTTPResponse(
+        status=200,
+        headers={
+            "Content-Type": "application/json"
+        },
+        body=json.dumps({
+            "color": color
+        })
+    )
+
+def move_response(move):
+    assert move in ['up', 'down', 'left', 'right'], \
+        "Move must be one of [up, down, left, right]"
+
+    return HTTPResponse(
+        status=200,
+        headers={
+            "Content-Type": "application/json"
+        },
+        body=json.dumps({
+            "move": move
+        })
+    )
+
+def end_response():
+    return HTTPResponse(
+        status=200
+    )
 
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
