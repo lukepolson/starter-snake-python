@@ -17,6 +17,7 @@ from tf_agents.specs import tensor_spec
 
 # Import Snake Environment
 import sys
+sys.path.insert(0, "app/app/")
 import matplotlib.pyplot as plt
 
 # Make Snake Environment
