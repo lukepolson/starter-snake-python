@@ -26,7 +26,7 @@ tf.random.set_seed(888)
 BOARD_SIZE=11
 
 # Import Policy
-policy = tf.compat.v2.saved_model.load('..\\policy_8')
+policy = tf.compat.v2.saved_model.load('policy_8')
 
 # Direction dictionary
 dir_dict = {0:'right', 1:'down', 2:'left', 3:'up'}
