@@ -232,8 +232,8 @@ def make_move(data):
 	if turn%10==0:
 		plt.imshow(np.squeeze(get_board(state), axis=-1))
 		plt.savefig('test{}.png'.format(turn))
-	action_step = policy.action(ts.restart(tf.convert_to_tensor([get_board(state)]), batch_size=1))
 	'''
+	action_step = policy.action(ts.restart(tf.convert_to_tensor([get_board(state)]), batch_size=1))
 	turn+=1
 	action_taken = take_action(data, state, action_step.action.numpy()[0])
 	return dir_dict[action_taken]
