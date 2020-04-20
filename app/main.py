@@ -16,6 +16,8 @@ from tf_agents.environments import tf_py_environment
 from tf_agents.trajectories import time_step as ts
 from tf_agents.specs import tensor_spec
 
+#import matplotlib.pyplot as plt
+
 
 # Import Snake Environment
 import sys
@@ -26,7 +28,7 @@ tf.random.set_seed(888)
 BOARD_SIZE=11
 
 # Import Policy
-policy = tf.compat.v2.saved_model.load('policy_8')
+policy = tf.compat.v2.saved_model.load('..\\policy_8')
 
 # Direction dictionary
 dir_dict = {0:'right', 1:'down', 2:'left', 3:'up'}
@@ -226,8 +228,12 @@ def make_move(data):
 	food_y_coords = [d['y'] for d in data['board']['food']]
 	for i, (x, y) in enumerate(zip(food_x_coords, food_y_coords)):
 		state[y][x] = FB
-		
+	'''
+	if turn%10==0:
+		plt.imshow(np.squeeze(get_board(state), axis=-1))
+		plt.savefig('test{}.png'.format(turn))
 	action_step = policy.action(ts.restart(tf.convert_to_tensor([get_board(state)]), batch_size=1))
+	'''
 	turn+=1
 	action_taken = take_action(data, state, action_step.action.numpy()[0])
 	return dir_dict[action_taken]
