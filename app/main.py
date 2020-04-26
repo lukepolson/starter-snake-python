@@ -28,7 +28,7 @@ tf.random.set_seed(888)
 BOARD_SIZE=11
 
 # Import Policy
-policy = tf.compat.v2.saved_model.load('policy_31')
+policy = tf.compat.v2.saved_model.load('policy_38')
 
 # Direction dictionary
 dir_dict = {0:'right', 1:'down', 2:'left', 3:'up'}
@@ -54,24 +54,24 @@ UR_en = 13 #Up then right OR left then down
 RU_en = 14 # Right then up OR down then left
 DR_en = 15 # Down then right OR left then up
 
-NB_obs = np.array([[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]], dtype=np.int32)
-FB_obs = np.array([[3,3,3,3,3], [3,3,3,3,3], [3,3,3,3,3], [3,3,3,3,3], [3,3,3,3,3]], dtype=np.int32)
+NB_obs = np.array([[0,0,0], [0,0,0], [0,0,0]], dtype=np.int32)
+FB_obs = np.array([[3,3,3], [3,3,3], [3,3,3]], dtype=np.int32)
 # Master
-HB_obs = np.array([[1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]], dtype=np.int32)
-SB_obs = np.array([[0,1,1,1,0], [0,1,1,1,0], [0,1,1,1,0], [0,1,1,1,0], [0,1,1,1,0]], dtype=np.int32)
-UB_obs = np.array([[0,0,0,0,0], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [0,0,0,0,0]], dtype=np.int32)
-DR_obs = np.array([[0,0,0,0,0], [1,1,1,1,0], [1,1,1,1,0], [1,1,1,1,0], [0,1,1,1,0]], dtype=np.int32)
-UR_obs = np.array([[0,0,0,0,0], [0,1,1,1,1], [0,1,1,1,1], [0,1,1,1,1], [0,1,1,1,0]], dtype=np.int32)
-RU_obs = np.array([[0,1,1,1,0], [1,1,1,1,0], [1,1,1,1,0], [1,1,1,1,0], [0,0,0,0,0]], dtype=np.int32)
-UL_obs = np.array([[0,1,1,1,0], [0,1,1,1,1], [0,1,1,1,1], [0,1,1,1,1], [0,0,0,0,0]], dtype=np.int32)
+HB_obs = np.array([[1,1,1], [1,1,1], [1,1,1]], dtype=np.int32)
+SB_obs = np.array([[0,1,0], [0,1,0], [0,1,0]], dtype=np.int32)
+UB_obs = np.array([[0,0,0], [1,1,1], [0,0,0]], dtype=np.int32)
+DR_obs = np.array([[0,0,0], [1,1,0], [0,1,0]], dtype=np.int32)
+UR_obs = np.array([[0,0,0], [0,1,1], [0,1,0]], dtype=np.int32)
+RU_obs = np.array([[0,1,0], [1,1,0], [0,0,0]], dtype=np.int32)
+UL_obs = np.array([[0,1,0], [0,1,1], [0,0,0]], dtype=np.int32)
 # Enemies
-HB_en_obs = 2*np.array([[1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]], dtype=np.int32)
-SB_en_obs = 2*np.array([[0,1,1,1,0], [0,1,1,1,0], [0,1,1,1,0], [0,1,1,1,0], [0,1,1,1,0]], dtype=np.int32)
-UB_en_obs = 2*np.array([[0,0,0,0,0], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1], [0,0,0,0,0]], dtype=np.int32)
-DR_en_obs = 2*np.array([[0,0,0,0,0], [1,1,1,1,0], [1,1,1,1,0], [1,1,1,1,0], [0,1,1,1,0]], dtype=np.int32)
-UR_en_obs = 2*np.array([[0,0,0,0,0], [0,1,1,1,1], [0,1,1,1,1], [0,1,1,1,1], [0,1,1,1,0]], dtype=np.int32)
-RU_en_obs = 2*np.array([[0,1,1,1,0], [1,1,1,1,0], [1,1,1,1,0], [1,1,1,1,0], [0,0,0,0,0]], dtype=np.int32)
-UL_en_obs = 2*np.array([[0,1,1,1,0], [0,1,1,1,1], [0,1,1,1,1], [0,1,1,1,1], [0,0,0,0,0]], dtype=np.int32)
+HB_en_obs = 2*HB_obs
+SB_en_obs = 2*SB_obs
+UB_en_obs = 2*UB_obs
+DR_en_obs = 2*DR_obs
+UR_en_obs = 2*UR_obs
+RU_en_obs = 2*RU_obs
+UL_en_obs = 2*UL_obs
 
 return_state = np.array([([NB_obs]*BOARD_SIZE) for i in range(BOARD_SIZE)], dtype=np.int32)
 
@@ -133,7 +133,7 @@ def get_board(state):
 	ARR[state==UR_en]=UR_en_obs
 	ARR[state==RU_en]=RU_en_obs
 	ARR[state==DR_en]=DR_en_obs	
-	return np.expand_dims(ARR.transpose((0,3,1,2)).reshape(5*BOARD_SIZE, 5*BOARD_SIZE), axis=-1)
+	return np.expand_dims(ARR.transpose((0,3,1,2)).reshape(3*BOARD_SIZE, 3*BOARD_SIZE), axis=-1)
 
 def make_move(data):
 	global x_tail_before
