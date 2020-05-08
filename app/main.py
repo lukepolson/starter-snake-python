@@ -86,7 +86,7 @@ def make_move(data):
                     state[y][x][II+1] = BB
 	
 	
-	# Add food
+	# Add fooda
     food_x_coords = [d['x'] for d in data['board']['food']]
     food_y_coords = [d['y'] for d in data['board']['food']]
     for i, (x, y) in enumerate(zip(food_x_coords, food_y_coords)):
