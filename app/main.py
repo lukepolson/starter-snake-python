@@ -3,7 +3,6 @@ import os
 import random
 import bottle
 
-os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
 
 import json
 from bottle import HTTPResponse
