@@ -5,3 +5,4 @@ gunicorn==19.9.0
 numpy==1.18.2
 tensorflow-cpu==1.15.0
 stable-baselines==2.10.0
+opencv-python==4.2.0.34
