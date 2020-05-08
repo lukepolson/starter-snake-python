@@ -22,7 +22,7 @@ sys.path.insert(0, "app/app/")
 BOARD_SIZE=11
 
 # Import Policy
-model = A2C.load("..\yeeters.zip")
+model = A2C.load("yeeters.zip")
 
 # Direction dictionary
 dir_dict = {0:'right', 1:'down', 2:'left', 3:'up'}
