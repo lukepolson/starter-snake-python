@@ -10,7 +10,6 @@ from bottle import HTTPResponse
 
 import numpy as np
 import tensorflow as tf
-import gym
 from stable_baselines import A2C
 
 #import matplotlib.pyplot as plt
