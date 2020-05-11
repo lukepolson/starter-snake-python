@@ -32,7 +32,7 @@ NB = 0 # Null Block
 FB = 2 # Food Block
 HB = 3 # Head block
 BB = 1
-AN = np.array([0,0,0,0,0])
+AN = np.array([0,0,0,0,0,0,0])
 
 
 x_tail_before = None
@@ -44,7 +44,7 @@ def make_move(data):
     global turn
 
 	# Create Board
-    state = np.array([([[NB]*(5)]*(BOARD_SIZE))\
+    state = np.array([([[NB]*(7)]*(BOARD_SIZE))\
                          for i in range((BOARD_SIZE))], dtype=np.int32)
 
 	# Add your snake
@@ -66,8 +66,10 @@ def make_move(data):
 	# Add Enemy Snakes
     master_id = data['you']['id']
     snakes = data['board']['snakes']
-    for II, snake in enumerate(snakes):
+    j=0
+    for snake in snakes:
         if snake['id']!=master_id:
+            j+=1
             if turn==0:
                 x_coords = [d['x'] for d in snake['body']][0:1]
                 y_coords = [d['y'] for d in snake['body']][0:1]
@@ -79,9 +81,9 @@ def make_move(data):
                 y_coords = [d['y'] for d in snake['body']]
             for i, (x, y) in enumerate(zip(x_coords, y_coords)):
                 if i == 0:
-                    state[y][x][II+1] = HB
+                    state[y][x][j] = HB
                 else:
-                    state[y][x][II+1] = BB
+                    state[y][x][j] = BB
 	
 	
 	# Add fooda
@@ -90,22 +92,36 @@ def make_move(data):
     for i, (x, y) in enumerate(zip(food_x_coords, food_y_coords)):
         state[y][x][4] = FB
     
+    
+    # Compute longest Snake Stuff
+    master_head_x, master_head_y = data['you']['body'][0]
+    master_length = len(data['you']['body'])
+    for snake in snakes:
+        if snake['id']!=master_id:
+            head_x, head_y = snake['body'][0]['x'], snake['body'][0]['y']
+            length = len(snake['body'])
+            if length>=master_length:
+                state[head_y][head_x][5]=1
+            elif length<master_length:
+                state[head_y][head_x][6]=1
+    
     turn+=1
+    
     action = model.predict(70*state, deterministic=True)[0]
     if move_snake(data, state, action):
-        print(state)
         return dir_dict[action]
     else:
-        print('ye')
         actions = [0,1,2,3]
         alives = [move_snake(data, state, action) for action in actions]
         indices = [i for i, x in enumerate(alives) if x == True]
         if len(indices)>0:
             return dir_dict[random.choice([actions[i] for i in indices])]
         else:
-            return 0
+            return dir_dict[0]
 
 def move_snake(data, state, action):
+        global turn
+        print(turn)
         # Returns alive
         
         old_position_x = data['you']['body'][0]['x']
@@ -127,8 +143,9 @@ def move_snake(data, state, action):
         curr_tail_x = data['you']['body'][-1]['x']
         curr_tail_y = data['you']['body'][-1]['y']
         if new_y==curr_tail_y and new_x==curr_tail_x:
-            landed_idx = curr_tails.index((new_y, new_x))
-            if data['you']['health']==100:
+            print('landed on tail on turn {}'.format(turn))
+            if data['you']['health']==100 or turn<4:
+                print('Returned False')
                 return False
             else:
                 return True
