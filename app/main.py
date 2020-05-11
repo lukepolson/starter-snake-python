@@ -144,8 +144,7 @@ def move_snake(data, state, action):
         curr_tail_y = data['you']['body'][-1]['y']
         if new_y==curr_tail_y and new_x==curr_tail_x:
             print('landed on tail on turn {}'.format(turn))
-            if data['you']['health']==100 or turn<4:
-                print('Returned False')
+            if data['you']['health']==100 or len(data['you']['body'])<4:
                 return False
             else:
                 return True
